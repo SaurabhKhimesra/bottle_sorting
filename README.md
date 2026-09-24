@@ -228,10 +228,12 @@ worked on the bench, not a product.
 
 ## Licence
 
-MIT, copyright the four of us jointly — see [LICENSE](LICENSE). The
-third-party code in `src/` keeps its own terms: realsense-ros is Apache-2.0,
-tmr_ros1 is BSD-3-Clause, and YOLOv5 is AGPL-3.0, which is worth knowing
-about before anyone reuses the brand classifier commercially.
+MIT, copyright the four of us jointly — see [LICENSE](LICENSE).
+
+The third-party code in `src/` keeps its own terms, listed in
+[THIRD_PARTY.md](THIRD_PARTY.md). The one to be aware of is YOLOv5, which is
+AGPL-3.0 — fine for coursework, something to deal with before reusing the
+brand classifier in a product.
 
 ## Team
 

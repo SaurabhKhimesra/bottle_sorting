@@ -19,14 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-This licence covers the tm12_bottle_sorting package written by the team.
-Third-party code included in this workspace keeps its own licence:
-
-  src/realsense-ros   Intel RealSense ROS wrapper, Apache-2.0
-                      (see src/realsense-ros/LICENSE and NOTICE)
-  src/tmr_ros1        Techman Robot ROS1 driver, BSD-3-Clause, added as a
-                      submodule
-  src/yolov5          Ultralytics YOLOv5, AGPL-3.0, added as a submodule
