@@ -43,7 +43,17 @@ If a person appears in frame the arm stops. If the depth image shows anything
 closer than a metre, that volume is pushed into the MoveIt planning scene as a
 collision box and the path is replanned around it.
 
-<img src="docs/media/hough_detection.jpg" width="49%" alt="Hough circle detection running on the crate, with the ROS log alongside"> <img src="docs/media/workcell.jpg" width="49%" alt="The TM12 with a RealSense mounted on the flange">
+Three stages of that cycle, from the June 2024 demonstration:
+
+| Gripping | Reading the label |
+|---|---|
+| <img src="docs/media/gripper.gif" alt="The gripper descending onto a bottle in the crate"> | <img src="docs/media/brand.gif" alt="A bottle held up to the second camera for brand classification"> |
+| The arm has the crate slot and drops onto the bottle. | The bottle is presented to `cam_2` and YOLOv5 reads the label. |
+
+![Hough circle detection running on the crate, with the ROS log alongside](docs/media/hough_detection.jpg)
+
+*`bottle_position.py` running: detected bottle mouths on the left, the node's
+log on the right. This is the view `show_debug_window` gives you.*
 
 ## How the nodes fit together
 
@@ -112,12 +122,29 @@ src/
 ├── realsense-ros/              vendored, not a submodule (see below)
 ├── tmr_ros1/                   submodule — Techman's TM driver
 └── yolov5/                     submodule — Ultralytics, holds our trained weights
+
+docs/media/                     demo footage and photos of the rig
+scripts/check_workspace.py      static checks, run in CI
 ```
 
 `realsense-ros` is a copy rather than a submodule because two of its launch
 files were edited in place for our two-camera rig —
 `rs_multiple_devices.launch` and `rs_d435_camera_with_model.launch`. Intel's
 `LICENSE` and `NOTICE` are kept with it.
+
+## The rig
+
+| | |
+|---|---|
+| ![The TM12 with a RealSense mounted on the flange, TMflow on the monitor](docs/media/workcell.jpg) | ![Close-up of the end effector: RealSense and pneumatic gripper on the flange](docs/media/end_effector.jpg) |
+| The TM12 with `cam_2` on the flange and TMflow on the monitor behind. | The end effector — depth camera and pneumatic gripper on the same mount. |
+| ![A divided crate holding the bottles used for sorting](docs/media/crate.jpg) | ![A RealSense on a tripod beside a laptop showing a calibration checkerboard](docs/media/calibration.jpg) |
+| The crate. The dividers are what the 4×4 slot mapping is counting. | Intrinsic calibration off a printed checkerboard, before either camera went on the arm. |
+
+![The TM12 teach pendant showing a taught point in Cartesian coordinates](docs/media/teach_pendant.jpg)
+
+*Teaching a pose in TMflow. The joint targets hardcoded in `node_1.cpp`,
+`node_3.cpp` and `node_7.cpp` were all read off this screen.*
 
 ## Build
 
@@ -198,6 +225,13 @@ worked on the bench, not a product.
   the launch files, shebangs and paths, written after the fact so the specific
   breakages listed at the bottom of this file can't come back. It is not a
   substitute for testing the motion.
+
+## Licence
+
+MIT, copyright the four of us jointly — see [LICENSE](LICENSE). The
+third-party code in `src/` keeps its own terms: realsense-ros is Apache-2.0,
+tmr_ros1 is BSD-3-Clause, and YOLOv5 is AGPL-3.0, which is worth knowing
+about before anyone reuses the brand classifier commercially.
 
 ## Team
 
