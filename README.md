@@ -8,6 +8,8 @@ the other reads the label once a bottle is held up to it.
 Built by Team 01 for **41069 Robotics Studio 2** at UTS in 2024.
 ROS 1 Noetic, Ubuntu 20.04.
 
+[![checks](https://github.com/SaurabhKhimesra/bottle_sorting/actions/workflows/ci.yml/badge.svg)](https://github.com/SaurabhKhimesra/bottle_sorting/actions/workflows/ci.yml)
+
 ![The arm picking a bottle out of the crate and placing it](docs/media/pick_place.gif)
 
 *Full two-minute run: [`docs/media/full_run.mp4`](docs/media/full_run.mp4)*
@@ -191,6 +193,10 @@ worked on the bench, not a product.
   calibration of one camera. `lookup_transform.py` does the same job through
   TF and is the direction the rest should have gone.
 - **No automated tests.** Everything was verified by running it on the arm.
+  `scripts/check_workspace.py` is the closest thing — it's static checks over
+  the launch files, shebangs and paths, written after the fact so the specific
+  breakages listed at the bottom of this file can't come back. It is not a
+  substitute for testing the motion.
 
 ## Team
 

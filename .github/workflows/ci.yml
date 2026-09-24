@@ -1,0 +1,25 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  workspace:
+    name: workspace checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'   # what ships with Noetic on 20.04
+
+      - name: Byte-compile the Python nodes
+        run: |
+          python -m compileall -q src/tm12_bottle_sorting/scripts
+
+      - name: Launch files, shebangs, paths, package.xml, submodules
+        run: python3 scripts/check_workspace.py
