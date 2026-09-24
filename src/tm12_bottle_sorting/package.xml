@@ -1,50 +1,47 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>tm12_bottle_sorting</name>
-  <version>0.0.0</version>
-  <description>The tm12_bottle_sorting package</description>
+  <version>1.0.0</version>
+  <description>
+    Sorts returned glass bottles into crates by brand using an Omron TM12
+    cobot and two Intel RealSense depth cameras. Built for 41069 Robotics
+    Studio 2 at UTS. Bottles are located with a Hough circle transform,
+    classified with YOLOv5, and placed by brand; a MediaPipe safety node
+    halts the arm while a person is in the workspace.
+  </description>
 
-  <!-- Maintainer information -->
-  <maintainer email="shantarao@todo.todo">shantarao</maintainer>
+  <maintainer email="learningkhimesra@gmail.com">Saurabh Khimesra</maintainer>
 
-  <!-- License information -->
-  <license>BSD</license>
+  <author>Darshil Amin</author>
+  <author>Rupesh Hirani</author>
+  <author>Sonu Kanwal</author>
+  <author>Saurabh Khimesra</author>
 
-  <!-- Dependency tags -->
+  <license>MIT</license>
+
+  <url type="repository">https://github.com/SaurabhKhimesra/bottle_sorting</url>
+
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>image_transport</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>tm_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>boost</build_depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>roslib</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>message_filters</depend>
+  <depend>tf</depend>
+  <depend>tm_msgs</depend>
+  <depend>boost</depend>
 
-  <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>cv_bridge</build_export_depend>
-  <build_export_depend>image_transport</build_export_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <build_export_depend>sensor_msgs</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
-  <build_export_depend>tm_msgs</build_export_depend>
-  <build_export_depend>message_runtime</build_export_depend>
-  <build_export_depend>boost</build_export_depend>
+  <!-- Runtime only: the cameras, the planner and the Python vision stack. -->
+  <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>moveit_commander</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
 
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>cv_bridge</exec_depend>
-  <exec_depend>image_transport</exec_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>tm_msgs</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
-  <exec_depend>boost</exec_depend>
-
-  <!-- Export tag for additional information -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
   </export>
 </package>

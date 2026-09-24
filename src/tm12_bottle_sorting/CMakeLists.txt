@@ -9,21 +9,20 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   rospy
+  roslib          # ros/package.h, used to resolve runtime paths
   sensor_msgs
   std_msgs
   tm_msgs
   roscpp
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+## node_7 walks the YOLOv5 output directory to find the newest run
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 ## Declare a catkin package
 catkin_package(
-  # INCLUDE_DIRS include
-  # LIBRARIES tm12_bottle_sorting
-  CATKIN_DEPENDS cv_bridge image_transport rospy sensor_msgs std_msgs tm_msgs roscpp
-  # DEPENDS system_lib
+  CATKIN_DEPENDS cv_bridge image_transport rospy roslib sensor_msgs std_msgs tm_msgs roscpp
+  DEPENDS Boost
 )
 
 ###########
@@ -32,8 +31,8 @@ catkin_package(
 
 ## Specify additional locations of header files
 include_directories(
-  # include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a C++ executable for the move_robot node
@@ -80,6 +79,11 @@ target_link_libraries(gripper_ON_node
   ${catkin_LIBRARIES}
 )
 
+## Declare a C++ executable for the gripper_OFF node
+add_executable(gripper_OFF_node src/gripper_OFF.cpp)
+add_dependencies(gripper_OFF_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gripper_OFF_node ${catkin_LIBRARIES})
+
 ## Declare a C++ executable for the node_6 node
 add_executable(node_6 src/node_6.cpp)
 
@@ -100,6 +104,7 @@ add_dependencies(node_7 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TA
 ## Specify libraries to link a library or executable target against
 target_link_libraries(node_7
   ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 ## Declare a C++ executable for the node_8 (turn off gripper) node
@@ -118,12 +123,21 @@ target_link_libraries(node_8
 #############
 
 ## Mark executables for installation
-install(TARGETS move_robot_node node_1 node_3 gripper_ON_node node_6 node_7 node_8
+install(TARGETS move_robot_node node_1 node_3 gripper_ON_node gripper_OFF_node node_6 node_7 node_8
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark python scripts for installation
-catkin_install_python(PROGRAMS scripts/bottle_position.py scripts/brand_detection.py
+catkin_install_python(PROGRAMS
+  scripts/Bottle_detection.py
+  scripts/Bottle_detection_f.py
+  scripts/bottle_position.py
+  scripts/brand_detection.py
+  scripts/human_detection_node.py
+  scripts/image_capture.py
+  scripts/image_depth_saver_1.py
+  scripts/image_saver.py
+  scripts/lookup_transform.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

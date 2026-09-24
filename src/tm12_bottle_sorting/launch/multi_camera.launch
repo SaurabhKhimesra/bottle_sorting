@@ -1,6 +1,7 @@
 <launch>
   <!--
-    Two D435s on fixed serials: cam_1 looks down into the incoming crate,
+    Two RealSense depth cameras on fixed serials: cam_1 looks down into the
+    incoming crate,
     cam_2 faces the gripper so the brand label is readable once a bottle
     is lifted. Node names set the topic namespace the other nodes subscribe
     to (/cam_1/..., /cam_2/...), so renaming a node here means renaming it
