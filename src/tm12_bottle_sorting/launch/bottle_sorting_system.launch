@@ -1,46 +1,55 @@
 <launch>
-    <!-- Launch the C++ node for robot control -->
-    <node name="robot_control" pkg="tm12_bottle_sorting" type="node_1" output="screen">
-        <!-- Ensure this node exists and has execute permissions -->
-    </node>
+    <!--
+      Full sorting cycle. Bring the cameras up first (multi_camera.launch),
+      then the TM driver, then this file.
 
-    <!-- Launch the Python node for image saving and processing -->
+      The nodes hand off to each other over std_msgs/String feedback topics
+      rather than running on a timer, so the order they appear here does not
+      matter - each one blocks until the message it waits for arrives.
+    -->
+
+    <!-- Where the nodes write captured frames and detection state. -->
+    <arg name="runtime_dir" default="$(find tm12_bottle_sorting)/../../runtime"/>
+
+    <!-- Moves the arm to the pose the crate is visible from. -->
+    <node name="robot_control" pkg="tm12_bottle_sorting" type="node_1" output="screen"/>
+
+    <!-- Hough-circle bottle detection: waits for "robot has reached", then
+         captures RGB-D, finds the bottles and writes the nearest crate slot. -->
     <node name="rgbd_image_saver" pkg="tm12_bottle_sorting" type="bottle_position.py" output="screen">
-        <param name="use_sim_time" value="false"/>
-        <!-- Parameters specific to the Python node can be added here -->
+        <param name="runtime_dir" value="$(arg runtime_dir)"/>
+        <param name="camera" value="/cam_1"/>
     </node>
-    
-    <!-- Launch the C++ node for setting positions with feedback -->
+
+    <!-- Reads that slot and drives the arm to it. -->
     <node name="set_positions_with_feedback" pkg="tm12_bottle_sorting" type="node_3" output="screen">
-        <!-- Ensure this node exists and has execute permissions -->
+        <param name="runtime_dir" value="$(arg runtime_dir)"/>
     </node>
 
-    <!-- Launch the C++ node for the main code (gripper_ON.cpp) -->
-    <node name="gripper_ON" pkg="tm12_bottle_sorting" type="gripper_ON_node" output="screen">
-        <!-- Ensure this node exists and has execute permissions -->
-    </node>
+    <!-- Close the gripper on the bottle. -->
+    <node name="gripper_ON" pkg="tm12_bottle_sorting" type="gripper_ON_node" output="screen"/>
 
-    <!-- Launch the C++ node for node_6 -->
-    <node name="node_6" pkg="tm12_bottle_sorting" type="node_6" output="screen">
-        <!-- Ensure this node exists and has execute permissions -->
-    </node>
+    <!-- Lift clear and present the bottle to the brand camera. -->
+    <node name="node_6" pkg="tm12_bottle_sorting" type="node_6" output="screen"/>
 
-    <!-- Launch the Python node for brand detection -->
+    <!-- YOLOv5 brand classification. -->
     <node name="brand_detection" pkg="tm12_bottle_sorting" type="brand_detection.py" output="screen">
-        <param name="use_sim_time" value="false"/>
-        <!-- Parameters specific to the Python node can be added here -->
+        <param name="runtime_dir" value="$(arg runtime_dir)"/>
+        <param name="camera" value="/cam_2"/>
     </node>
 
-    <!-- Launch the C++ node for node_7 -->
+    <!-- Place into the crate matching the detected brand. -->
     <node name="node_7" pkg="tm12_bottle_sorting" type="node_7" output="screen">
-        <!-- Ensure this node exists and has execute permissions -->
+        <param name="runtime_dir" value="$(arg runtime_dir)"/>
     </node>
-    
-     <!-- Launch the Python node for human detection (node_9) -->
+
+    <!-- Release. -->
+    <node name="node_8" pkg="tm12_bottle_sorting" type="node_8" output="screen"/>
+
+    <!-- Safety overlay: stops the arm while a person is in frame, and
+         replans around anything closer than the depth threshold. -->
     <node name="human_detection_node" pkg="tm12_bottle_sorting" type="human_detection_node.py" output="screen">
-        <param name="use_sim_time" value="false"/>
-        <!-- Parameters specific to the Python node can be added here -->
+        <param name="image_topic" value="/cam_1/color/image_raw"/>
     </node>
-    
-    
+
 </launch>

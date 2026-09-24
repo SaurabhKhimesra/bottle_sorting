@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+import sys
+
 import rospy
 import cv2
 import numpy as np
+import mediapipe as mp
 import pyrealsense2 as rs
 import moveit_commander
 import moveit_msgs.msg
@@ -26,6 +29,10 @@ fx = 606.5270385742188
 fy = 605.458984375
 cx = 326.5716247558594
 cy = 244.11395263671875
+
+# MediaPipe pose/landmark detection
+holistic = mp.solutions.holistic.Holistic(min_detection_confidence=0.5,
+                                          min_tracking_confidence=0.5)
 
 # Robot control parameters
 bridge = CvBridge()
@@ -108,10 +115,12 @@ def main():
     rospy.init_node('human_detection_node', anonymous=True)
     
     # Subscribe to the camera feed
-    rospy.Subscriber('/cam_/color/image_raw', Image, image_callback)
+    image_topic = rospy.get_param('~image_topic', '/cam_1/color/image_raw')
+    rospy.Subscriber(image_topic, Image, image_callback)
+    rospy.loginfo("Human detection watching %s", image_topic)
 
     # Keep the node running
     rospy.spin()
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()

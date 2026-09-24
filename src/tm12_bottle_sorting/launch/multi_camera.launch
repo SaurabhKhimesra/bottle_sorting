@@ -1,13 +1,23 @@
 <launch>
-  <!-- Launch first RealSense Camera -->
-  <node name="camera1" pkg="realsense2_camera" type="realsense2_camera_node" output="screen">
-    <param name="serial_no" value="317222070960"/>
-    <param name="camera" value="camera1"/>
+  <!--
+    Two D435s on fixed serials: cam_1 looks down into the incoming crate,
+    cam_2 faces the gripper so the brand label is readable once a bottle
+    is lifted. Node names set the topic namespace the other nodes subscribe
+    to (/cam_1/..., /cam_2/...), so renaming a node here means renaming it
+    in bottle_sorting_system.launch too.
+
+    Serials are the two units on the lab bench - run `rs-enumerate-devices`
+    and override them if you are on different hardware.
+  -->
+  <arg name="cam_1_serial" default="317222070960"/>
+  <arg name="cam_2_serial" default="241122302615"/>
+
+  <node name="cam_1" pkg="realsense2_camera" type="realsense2_camera_node" output="screen">
+    <param name="serial_no" value="$(arg cam_1_serial)"/>
+    <param name="align_depth" value="true"/>
   </node>
 
-  <!-- Launch second RealSense Camera -->
-  <node name="camera2" pkg="realsense2_camera" type="realsense2_camera_node" output="screen">
-    <param name="serial_no" value="241122302615"/>
-    <param name="camera" value="camera2"/>
+  <node name="cam_2" pkg="realsense2_camera" type="realsense2_camera_node" output="screen">
+    <param name="serial_no" value="$(arg cam_2_serial)"/>
   </node>
 </launch>
