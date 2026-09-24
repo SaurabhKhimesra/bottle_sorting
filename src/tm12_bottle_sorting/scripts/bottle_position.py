@@ -1,19 +1,37 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import os
 
 import rospy
+import rospkg
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
 
+
+def runtime_dir():
+    """Directory the captured frames and the bottle slot are written to.
+
+    Defaults to runtime/ inside the package so a fresh clone works without
+    configuration; override with the runtime_dir parameter to point it at a
+    tmpfs or a shared folder.
+    """
+    default = os.path.join(rospkg.RosPack().get_path('tm12_bottle_sorting'), 'runtime')
+    path = rospy.get_param('~runtime_dir', default)
+    os.makedirs(path, exist_ok=True)
+    return path
+
 class RGBDImageSaver:
     def __init__(self):
         self.bridge = CvBridge()
         self.rgb_image = None
         self.depth_image = None
-        rospy.Subscriber('/cam_1/color/image_raw', Image, self.rgb_callback)
-        rospy.Subscriber('/cam_1/depth/image_rect_raw', Image, self.depth_callback)
+        self.runtime_dir = runtime_dir()
+        camera = rospy.get_param('~camera', '/cam_1')
+        rospy.Subscriber(camera + '/color/image_raw', Image, self.rgb_callback)
+        rospy.Subscriber(camera + '/depth/image_rect_raw', Image, self.depth_callback)
         rospy.Subscriber('robot_feedback', String, self.feedback_callback)
         self.feedback_pub = rospy.Publisher('gripper_feedback', String, queue_size=10)
         self.position_reached = False
@@ -31,20 +49,20 @@ class RGBDImageSaver:
 
     def save_images(self):
         if self.rgb_image is not None and self.depth_image is not None:
-            cv2.imwrite('/home/rh/catkin_ws/src/path_to_save_rgb_images/rgb_image.jpg', self.rgb_image)
-            cv2.imwrite('/home/rh/catkin_ws/src/path_to_save_rgb_images/depth_image.png', self.depth_image)
-            print("Images saved successfully.")
+            cv2.imwrite(os.path.join(self.runtime_dir, 'rgb_image.jpg'), self.rgb_image)
+            cv2.imwrite(os.path.join(self.runtime_dir, 'depth_image.png'), self.depth_image)
+            rospy.loginfo("Saved RGB and depth frames to %s", self.runtime_dir)
             self.process_images()
 
     def process_images(self):
-        rgb_image_path = "/home/rh/catkin_ws/src/path_to_save_rgb_images/rgb_image.jpg"
+        rgb_image_path = os.path.join(self.runtime_dir, 'rgb_image.jpg')
         detected_bottle_coords, processed_image = detect_hough_circles(rgb_image_path)
         bottle_positions = get_bottle_position(detected_bottle_coords)
         
         if bottle_positions:
             min_position = min(bottle_positions)
-            print("Minimum Bottle Position:", min_position)
-            with open('/home/rh/catkin_ws/src/path_to_save_rgb_images/min_bottle_position.txt', 'w') as file:
+            rospy.loginfo("Minimum bottle position: %s", min_position)
+            with open(os.path.join(self.runtime_dir, 'min_bottle_position.txt'), 'w') as file:
                 file.write(str(min_position))
             
             # Publish message to indicate coordinates are being sent to the gripper
@@ -52,18 +70,16 @@ class RGBDImageSaver:
             msg.data = "sending co-ordinates of the detected bottle to the gripper"
             self.feedback_pub.publish(msg)
         
-        print("Detected Bottle Coordinates:")
-        for coord in detected_bottle_coords:
-            print(f"Bottle at {coord}")
-        
-        print("Bottle Positions:")
-        for position in bottle_positions:
-            print(f"Bottle position: {position}")
+        rospy.loginfo("Detected bottle coordinates: %s", detected_bottle_coords)
+        rospy.loginfo("Crate slots occupied: %s", bottle_positions)
 
-        # Optionally display the circles image
-        cv2.imshow("Hough Circles", processed_image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # Always write the annotated frame; only pop a window up when asked,
+        # since waitKey blocks the callback and there is no display under
+        # roslaunch.
+        cv2.imwrite(os.path.join(self.runtime_dir, 'detected_bottle.png'), processed_image)
+        if rospy.get_param('~show_debug_window', False):
+            cv2.imshow("Hough Circles", processed_image)
+            cv2.waitKey(1)
 
     def run(self):
         rospy.init_node('rgbd_image_saver', anonymous=True)

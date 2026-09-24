@@ -33,8 +33,12 @@ translation_vector = np.array([0.015260392799973488, 1.0333438694942743e-05, 0.0
 
 depth_scale = profile.get_device().first_depth_sensor().get_depth_scale()
 
-# Path to save images
-save_path = '/home/shantarao/catkin_ws/src/tm12_bottle_sorting/Saved_image'
+# Path to save images. This script drives the camera directly rather than
+# running as a ROS node, so it resolves the directory relative to itself.
+save_path = os.environ.get(
+    'TM12_RUNTIME_DIR',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, 'runtime'))
+os.makedirs(save_path, exist_ok=True)
 
 # Gripper transformation parameters (provided)
 gripper_translation = np.array([717.360, 38.198, 389.279])

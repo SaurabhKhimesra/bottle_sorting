@@ -9,7 +9,7 @@
     -->
 
     <!-- Where the nodes write captured frames and detection state. -->
-    <arg name="runtime_dir" default="$(find tm12_bottle_sorting)/../../runtime"/>
+    <arg name="runtime_dir" default="$(find tm12_bottle_sorting)/runtime"/>
 
     <!-- Moves the arm to the pose the crate is visible from. -->
     <node name="robot_control" pkg="tm12_bottle_sorting" type="node_1" output="screen"/>

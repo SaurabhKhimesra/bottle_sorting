@@ -1,5 +1,6 @@
 // ROS headers
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <std_msgs/String.h>
 #include <fstream> // Include for file I/O
 #include <vector>
@@ -86,13 +87,19 @@ int main(int argc, char **argv) {
         loop_rate.sleep();
     }
 
-    // Read the position index from a file
-    std::ifstream inputFile("/home/rh/catkin_ws/src/path_to_save_rgb_images/min_bottle_position.txt");
+    // Read the position index written by bottle_position.py. Same default as
+    // the Python side: runtime/ inside the package, overridable per launch.
+    std::string runtime_dir;
+    ros::param::param<std::string>("~runtime_dir", runtime_dir,
+                                   ros::package::getPath("tm12_bottle_sorting") + "/runtime");
+
+    const std::string position_file = runtime_dir + "/min_bottle_position.txt";
+    std::ifstream inputFile(position_file);
     int positionIndex;
     if (inputFile >> positionIndex) {
         ROS_INFO_STREAM("Read minimum position index from file: " << positionIndex);
     } else {
-        ROS_ERROR_STREAM("Failed to read position index from file");
+        ROS_ERROR_STREAM("Failed to read position index from " << position_file);
         return 1; // Exit if unable to read file
     }
     inputFile.close();

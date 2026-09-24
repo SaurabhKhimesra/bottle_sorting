@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 import rospy
+import rospkg
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import os
 from sensor_msgs.msg import Image
 import message_filters
+
+
+def runtime_dir():
+    """Where captured frames are written. Override with the runtime_dir param."""
+    default = os.path.join(rospkg.RosPack().get_path('tm12_bottle_sorting'), 'runtime')
+    path = rospy.get_param('~runtime_dir', default)
+    os.makedirs(path, exist_ok=True)
+    return path
 
 # Initialize a flag to check if the image has been saved
 image_saved = False
@@ -24,10 +33,7 @@ def callback(color_msg, depth_msg):
             print(e)
             return
 
-        # Define directory to save images
-        save_path = '/home/shantarao/catkin_ws/src/tm12_bottle_sorting/Saved_image'
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
+        save_path = runtime_dir()
 
         # Fixed filenames for the images
         image_name = 'rgb1.jpeg'

@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+
 import cv2
 import os
 import rospy
+import rospkg
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from std_msgs.msg import String
@@ -11,10 +14,16 @@ rospy.init_node('rgbd_camera_yolo', anonymous=True)
 # Create a CV bridge to convert ROS images to OpenCV format
 bridge = CvBridge()
 
-# Paths
-image_save_path = '/home/rh/catkin_ws/src/rgbd_camera_input'
-yolo_script_path = '/home/rh/catkin_ws/src/yolov5'
+# Paths. yolov5 is a submodule of this workspace, so it sits alongside the
+# package rather than inside it; both are overridable from the launch file.
+_pkg_dir = rospkg.RosPack().get_path('tm12_bottle_sorting')
+image_save_path = rospy.get_param('~runtime_dir', os.path.join(_pkg_dir, 'runtime'))
+yolo_script_path = rospy.get_param('~yolov5_dir', os.path.join(_pkg_dir, os.pardir, 'yolov5'))
+weights_path = rospy.get_param(
+    '~weights', os.path.join(yolo_script_path, 'runs', 'train', 'exp', 'weights', 'best.pt'))
 output_directory = 'static_output'  # Consistent output directory for YOLOv5
+
+os.makedirs(image_save_path, exist_ok=True)
 
 # Publisher for the class ID and detection message
 result_publisher = rospy.Publisher('bottle_sorting_topic', String, queue_size=10)
@@ -33,7 +42,9 @@ def handle_single_image(msg):
         rospy.loginfo(f"Image saved at {img_filepath}")
 
         # YOLOv5 detection
-        detection_command = f"python3 {yolo_script_path}/detect.py --weights {yolo_script_path}/runs/train/exp/weights/best.pt --img 256 --conf 0.25 --source {img_filepath} --save-txt --name {output_directory}"
+        detection_command = (
+            f"python3 {yolo_script_path}/detect.py --weights {weights_path} "
+            f"--img 256 --conf 0.25 --source {img_filepath} --save-txt --name {output_directory}")
         rospy.loginfo(f"Running detection command: {detection_command}")
         os.system(detection_command)
 
@@ -73,7 +84,8 @@ def bottle_detection_ready_callback(msg):
     if msg.data == "Ready to detect the bottle.":
         rospy.loginfo("Received message: Ready to detect the bottle.")
         # Subscribe to the RGB-D camera image topic
-        image_sub = rospy.Subscriber("/cam_2/color/image_raw", Image, handle_single_image)
+        camera = rospy.get_param('~camera', '/cam_2')
+        image_sub = rospy.Subscriber(camera + "/color/image_raw", Image, handle_single_image)
 
 # Subscribe to the bottle detection readiness topic
 ready_sub = rospy.Subscriber("bottle_detection_ready", String, bottle_detection_ready_callback)

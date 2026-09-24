@@ -12,7 +12,7 @@
 // Global variables to store feedback states
 std::vector<double> current_joint_positions(6, 0.0);
 bool position_reached = false;
-const double tolerance = 0.01; // 5% tolerance
+const double tolerance = 0.01; // 1% of the target joint angle
 
 void feedbackCallback(const tm_msgs::FeedbackState::ConstPtr& msg) {
     current_joint_positions = msg->joint_pos;

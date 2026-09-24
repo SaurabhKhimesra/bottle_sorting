@@ -37,7 +37,7 @@ holistic = mp.solutions.holistic.Holistic(min_detection_confidence=0.5,
 # Robot control parameters
 bridge = CvBridge()
 current_joint_positions = [0.0] * 6
-tolerance = 0.05  # 5% tolerance
+tolerance = 0.05  # 5% of the target joint angle
 
 # MoveIt! Initialization
 moveit_commander.roscpp_initialize(sys.argv)

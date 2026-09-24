@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -114,7 +115,21 @@ void bottle_detection_ready_callback(const std_msgs::String::ConstPtr& msg) {
         }}
     };
 
-        std::string base_directory = "/home/rh/catkin_ws/src/yolov5/runs/detect";
+        // yolov5 is a sibling of this package in the workspace; the counters
+        // live beside the frames the vision nodes write.
+        const std::string package_path = ros::package::getPath("tm12_bottle_sorting");
+
+        std::string runtime_dir, yolov5_dir;
+        ros::param::param<std::string>("~runtime_dir", runtime_dir, package_path + "/runtime");
+        ros::param::param<std::string>("~yolov5_dir", yolov5_dir, package_path + "/../yolov5");
+
+        const std::string base_directory = yolov5_dir + "/runs/detect";
+        if (!fs::exists(base_directory)) {
+            ROS_ERROR_STREAM("YOLOv5 output directory not found: " << base_directory
+                             << " (set the yolov5_dir parameter)");
+            return;
+        }
+
         fs::path latest_dir;
         std::time_t latest_time = 0;
 
@@ -180,8 +195,9 @@ void bottle_detection_ready_callback(const std_msgs::String::ConstPtr& msg) {
                 }
 
                 // Define paths for count and reset files
-                std::string count_file = "/home/rh/catkin_ws/src/counts/detection_count_" + std::to_string(class_id) + ".txt";
-                std::string reset_file = "/home/rh/catkin_ws/src/counts/reset_" + std::to_string(class_id) + ".txt";
+                fs::create_directories(runtime_dir);
+                std::string count_file = runtime_dir + "/detection_count_" + std::to_string(class_id) + ".txt";
+                std::string reset_file = runtime_dir + "/reset_" + std::to_string(class_id) + ".txt";
 
                 // Load the count from file or set to 0 if not present
                 int count = 0;
