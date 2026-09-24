@@ -34,8 +34,9 @@ The cycle runs once per bottle:
 3. The arm moves to that slot and the pneumatic gripper closes on the bottle.
 4. The bottle comes up in front of `cam_2`, and YOLOv5 classifies the label
    into one of three brands.
-5. The arm carries it to that brand's crate and drops it into the next free
-   sub-position, cycling through three per crate so bottles don't stack.
+5. The arm carries it to that brand's crate and drops it in. A per-brand
+   counter on disk rotates between three drop positions so bottles don't
+   stack on each other — it's a round-robin, not free-space detection.
 
 Running alongside all of that, a MediaPipe pose detector watches the workspace.
 If a person appears in frame the arm stops. If the depth image shows anything
