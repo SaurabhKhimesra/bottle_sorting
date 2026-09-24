@@ -1,0 +1,22 @@
+# catkin workspace output
+build/
+devel/
+logs/
+install/
+.catkin_workspace
+
+# runtime output written by the nodes (see runtime/ in the README)
+runtime/
+
+# YOLOv5 training and inference output
+src/yolov5/runs/
+
+# python
+__pycache__/
+*.py[cod]
+
+# editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
